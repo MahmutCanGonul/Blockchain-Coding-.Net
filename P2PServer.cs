@@ -14,10 +14,10 @@ namespace BlockchainCoding
 
         public void Start()
         {
-            webSocketServer = new WebSocketServer($"ws://172.18.208.1:{Program.Port}");// your local ip address 
+            webSocketServer = new WebSocketServer($"ws://Your_Local_IP_Address:{Program.Port}");// your local ip address 
             webSocketServer.AddWebSocketService<P2PServer>("/Blockchain");
             webSocketServer.Start();
-            Console.WriteLine($"Sever is started this address:  ws://172.18.208.1:{Program.Port}");
+            Console.WriteLine($"Sever is started this address:  ws://Your_Local_IP_Address:{Program.Port}");
         }
 
 
