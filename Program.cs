@@ -60,11 +60,11 @@ namespace BlockchainCoding
                 {
                     case 1:
                         if (Port == 5001)
-                            serverUrl = $"ws://172.18.208.1:{Port + 1}";
+                            serverUrl = $"ws://Your_Local_IP_Address:{Port + 1}";
                         else if (Port == 5002)
-                            serverUrl = $"ws://172.18.208.1:{Port - 1}";
+                            serverUrl = $"ws://Your_Local_IP_Address:{Port - 1}";
                         else
-                            serverUrl = $"ws://172.18.208.1:{ConstPort}";
+                            serverUrl = $"ws://Your_Local_IP_Address:{ConstPort}";
                         Console.WriteLine("Connected URL server:)");
                         client.Connect($"{serverUrl}/Blockchain");
                         break;
