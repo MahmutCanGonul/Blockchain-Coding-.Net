@@ -255,9 +255,186 @@
 
  🥇Well Done! You are create a first blockchain!!!       
        
-      
+  
+↪️Now we have last goals for P2P communication:
+
+➡️4.STEP=> Create a server for it is help to connection between two or more program:
+
+ 🎱We need this package: 
+                  
+                   using WebSocketSharp.Server; // This package important for server
+                   using Newtonsoft.Json; // This package important for send and get json data to each other
+                   using WebSocketSharp; // This package important for server
+                   
+                   
+                   
+                   
+💣Create Objects for P2P Server:
+              
+        public bool isServerSynched = false;
+        WebSocketServer webSocketServer = null;
+
+💣Create a Start Method: 
+
+         public void Start()
+        {
+            webSocketServer = new WebSocketServer($"ws://YOUR_API_ADDRESS:{Program.Port}");// your local ip address 
+            webSocketServer.AddWebSocketService<P2PServer>("/Blockchain");
+            webSocketServer.Start();
+            Console.WriteLine($"Sever is started this address:  ws://YOUR_API_ADDRESS {Program.Port}");
+        }
+                   
+
+🛰️By the way how to learn you IP Adress:
+           
+  💣Open terminal and write [IPv4 is your IP Address]: 
+               
+                 ipconfig
+          
+          
+ ![image](https://user-images.githubusercontent.com/75094927/138742664-cbf008b3-aa78-456c-ad9f-b86480bbba77.png)
+
+          
+          
+💣We need to send message on other client so that we need to OnMessage() Method:
+
+         
+          protected override void OnMessage(MessageEventArgs e)
+        {
+            
+            if (e.Data == "Hello Server") // If this message come our server from the client 
+            {
+              
+                Console.WriteLine(e.Data); 
+                Send("Hello Client"); // We should  send message to Client
+            }
+             
+            else
+            {
+                Blockchain newBlockChain = JsonConvert.DeserializeObject<Blockchain>(e.Data); // Create a new Blockchain and this blockchain has client data
+                
+                if (newBlockChain.IsValid() && newBlockChain.chain.Count > Program.blockchain.chain.Count) // if your Blockchain is valid and server blockchain is bigger than our current blockchain do that this things
+                {
+                    List<Transaction> newTransactions = new List<Transaction>();
+                    newTransactions.AddRange(newBlockChain.pendingTransactions);
+                    newTransactions.AddRange(Program.blockchain.pendingTransactions);
+                    newBlockChain.pendingTransactions = newTransactions;
+                    Program.blockchain = newBlockChain;
+
+                }
+            }
+
+            if (!isServerSynched)  // if isServerSynched is not valid send the our current blockchain like a string format and turn on true isServerSynched 
+            {
+                Send(JsonConvert.SerializeObject(Program.blockchain));
+                isServerSynched = true;
+            }
+
+        }
+ 
+  
+🥇Wonderfull! You are create a P2P Server you almost done!!!
 
 
+✈️We have last step:
+
+
+➡️5.STEP=> Create a client for communicate with server:
+
+💣We need to create objects:
+           
+          public IDictionary<string, WebSocket> webDic = new Dictionary<string, WebSocket>();
+
+          
+💣We need to create Connect Method:
+
+         public void Connect(string url)
+        {
+            if (!webDic.ContainsKey(url)) // If this url has not on our webDic list
+            {
+                WebSocket webSocket = new WebSocket(url); // Create a new websocket and it has this url
+                webSocket.OnMessage += (sender, e) =>
+                {
+                    if(e.Data == "Hello Client") // If client recieve a this message
+                    {
+                        Console.WriteLine(e.Data); // Write that
+                    }
+                    else If client has not recieve a this message
+                    {
+                        Blockchain newBlockChain = JsonConvert.DeserializeObject<Blockchain>(e.Data); //Create a blockchain and it has this data
+                        if (newBlockChain.IsValid() && newBlockChain.chain.Count > Program.blockchain.chain.Count)
+                        {
+                            List<Transaction> newTransactions = new List<Transaction>(); // Create a transaction list
+                            newTransactions.AddRange(newBlockChain.pendingTransactions); //add late new transaction on new transactions
+                            newTransactions.AddRange(Program.blockchain.pendingTransactions);//add late current transaction on new transactions
+                            newBlockChain.pendingTransactions = newTransactions; // late transaction equal on new tansaction
+                            Program.blockchain = newBlockChain; // current blockchain equal is new Blockchain 
+
+                        }
+                    }
+                };
+
+                webSocket.Connect(); // Connect the socket
+                webSocket.Send("Hello Server"); // send message on server
+                webSocket.Send(JsonConvert.SerializeObject(Program.blockchain)); // send data also server
+                webDic.Add(url,webSocket); // add that url and socket on webDic list
+            }
+        }
+           
+
+💣Create a Send Method:
+
+         public void Send(string url,string data)
+        {
+            foreach(var item in webDic)
+            {
+               if(item.Key== url)
+                {
+                    item.Value.Send(data);
+                }
+            }
+        }
+        
+ 💣Create a BroadCast Method for send that all data in the system:
+         
+          public void BroadCast(string data)
+        {
+            foreach(var item in webDic)
+            {
+                item.Value.Send(data);
+            }
+        }
+        
+ 
+ 💣Create a Get Servers method: [Get all servers available]
+ 
+            public IList<string> GetServers()
+        {
+            IList<string> servers = new List<string>();
+            foreach(var item in webDic)
+            {
+                servers.Add(item.Key);
+            }
+         
+            return servers;
+
+        }
+ 
+ 
+ 💣Last part is create a close method: [close the websocket]
+ 
+            public void Close()
+        {
+            foreach(var item in webDic)
+            {
+                item.Value.Close();
+               
+            }
+        }
+ 
+ 
+ 🥇Woow! You are create a first P2P blockchain with .NET Congratssss!!!! 
+ 
 OUTPUT: 
 
 
